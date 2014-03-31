@@ -1,4 +1,4 @@
-authentication-core
-===================
+authentication-ri
+=================
 
-The default implementation of the authentication-api.
+The reference implementation of the authentication-api.
