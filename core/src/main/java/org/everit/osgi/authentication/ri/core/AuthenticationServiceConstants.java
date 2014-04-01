@@ -18,7 +18,7 @@ package org.everit.osgi.authentication.ri.core;
 
 public final class AuthenticationServiceConstants {
 
-    public static final String COMPONENT_NAME = "org.everit.authentication.ri.core.Authentication";
+    public static final String COMPONENT_NAME = "org.everit.osgi.authentication.ri.core.Authentication";
 
     public static final String PROP_PROPERTY_SERVICE_TARGET = "propertyService.target";
 
