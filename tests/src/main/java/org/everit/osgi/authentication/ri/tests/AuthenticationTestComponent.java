@@ -62,12 +62,12 @@ public class AuthenticationTestComponent {
 
     };
 
-    public void bindAuthenticationService(final AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
+    public void bindAuthenticationService(final AuthenticationService as) {
+        authenticationService = as;
     }
 
-    public void bindPropertyService(final PropertyService propertyService) {
-        this.propertyService = propertyService;
+    public void bindPropertyService(final PropertyService ps) {
+        propertyService = ps;
     }
 
     @Test
