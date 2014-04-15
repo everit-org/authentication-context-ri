@@ -136,6 +136,7 @@ public class AuthenticationTestComponent {
             authenticationService.logout(subject);
             Assert.fail();
         } catch (UnsupportedOperationException e) {
+            Assert.assertNull(e.getMessage());
         }
     }
 

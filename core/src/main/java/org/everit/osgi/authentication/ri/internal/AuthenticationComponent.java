@@ -37,6 +37,9 @@ import org.everit.osgi.resource.api.ResourceService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+/**
+ * The reference implementation of the {@link AuthenticationService}.
+ */
 @Component(name = AuthenticationConstants.COMPONENT_NAME, metatype = true, // FIXME remove immediate = true
         immediate = true,
         configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
@@ -47,20 +50,41 @@ import org.osgi.framework.ServiceRegistration;
 @Service
 public class AuthenticationComponent implements AuthenticationService {
 
+    /**
+     * The {@link ResourceService} used to initialize the resource of the default subject.
+     */
     @Reference
     private ResourceService resourceService;
 
+    /**
+     * The {@link PropertyService} used to load/store the value of the
+     * {@link AuthenticationService#PROP_DEFAULT_SUBJECT_RESOURCE_ID}.
+     */
     // FIXME @Reference
     private PropertyService propertyService;
 
+    /**
+     * The subject assigned to the actual thread.
+     */
     private final InheritableThreadLocal<ImmutableSubject> currentSubject =
             new InheritableThreadLocal<ImmutableSubject>();
 
+    /**
+     * The default subject.
+     */
     private ImmutableSubject defaultSubject;
 
     // FIXME remove
     private ServiceRegistration<PropertyService> propertyServiceSR;
 
+    /**
+     * The activate method if this OSGi component. It initializes the {@link #defaultSubject}.
+     * 
+     * @param context
+     *            the bundle context
+     * @param componentProperties
+     *            the properties of this component
+     */
     @Activate
     public void activate(final BundleContext context, final Map<String, Object> componentProperties) {
         // FIXME remove service registration
@@ -96,14 +120,26 @@ public class AuthenticationComponent implements AuthenticationService {
         defaultSubject = new ImmutableSubject(defaultSubjectResourceId);
     }
 
-    public void bindPropertyService(final PropertyService propertyService) {
-        this.propertyService = propertyService;
+    /**
+     * The property binding method of {@link #propertyService}.
+     * 
+     * @param ps
+     *            the service to bind
+     */
+    public void bindPropertyService(final PropertyService ps) {
+        propertyService = ps;
     }
 
-    public void bindResourceService(final ResourceService resourceService) {
-        this.resourceService = resourceService;
+    /**
+     * The property binding method of {@link #resourceService}.
+     * 
+     * @param rs
+     */
+    public void bindResourceService(final ResourceService rs) {
+        resourceService = rs;
     }
 
+    // FIXME remove
     @Deactivate
     public void deactivate() {
         if (propertyServiceSR != null) {
@@ -153,11 +189,13 @@ public class AuthenticationComponent implements AuthenticationService {
         }
         ImmutableSubject immutableSubject = new ImmutableSubject(subject.getResourceId());
         currentSubject.set(immutableSubject);
+        T rval = null;
         try {
-            return authenticatedAction.run();
+            rval = authenticatedAction.run();
         } finally {
             currentSubject.set(defaultSubject);
         }
+        return rval;
     }
 
 }

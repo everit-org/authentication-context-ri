@@ -16,12 +16,26 @@
  */
 package org.everit.osgi.authentication.ri.internal;
 
+/**
+ * Constants of the {@link AuthenticationComponent}.
+ */
 public final class AuthenticationConstants {
 
+    /**
+     * The component name of the {@link AuthenticationComponent}.
+     */
     public static final String COMPONENT_NAME = "org.everit.osgi.authentication.ri.Authentication";
 
+    /**
+     * The property name of the OSGi filter expression defining which {@link org.everit.osgi.props.PropertyService}
+     * should be used by {@link AuthenticationComponent}.
+     */
     public static final String PROP_PROPERTY_SERVICE_TARGET = "propertyService.target";
 
+    /**
+     * The property name of the OSGi filter expression defining which
+     * {@link org.everit.osgi.resource.api.ResourceService} should be used by {@link AuthenticationComponent}.
+     */
     public static final String PROP_RESOURCE_SERVICE_TARGET = "resourceService.target";
 
     private AuthenticationConstants() {

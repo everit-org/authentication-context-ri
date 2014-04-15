@@ -18,17 +18,34 @@ package org.everit.osgi.authentication.ri;
 
 import org.everit.osgi.authentication.api.Subject;
 
+/**
+ * A immutable {@link Subject} thats resource ID cannot be changed.
+ */
 public class ImmutableSubject implements Subject {
 
+    /**
+     * Serial version UID.
+     */
+    private static final long serialVersionUID = 8682418286332340365L;
+
+    /**
+     * The resource ID of this subject.
+     */
     private final long resourceId;
 
+    /**
+     * Constructor.
+     * 
+     * @param resourceId
+     *            the resource ID of this subject.
+     */
     public ImmutableSubject(final long resourceId) {
         super();
         this.resourceId = resourceId;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public final boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -46,12 +63,12 @@ public class ImmutableSubject implements Subject {
     }
 
     @Override
-    public long getResourceId() {
+    public final long getResourceId() {
         return resourceId;
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         final int prime = 31;
         int result = 1;
         result = (prime * result) + (int) (resourceId ^ (resourceId >>> 32));
@@ -59,7 +76,7 @@ public class ImmutableSubject implements Subject {
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return "ImmutableSubject [resourceId=" + resourceId + "]";
     }
 
