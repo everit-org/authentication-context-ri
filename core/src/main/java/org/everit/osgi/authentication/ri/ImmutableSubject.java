@@ -19,7 +19,7 @@ package org.everit.osgi.authentication.ri;
 import org.everit.osgi.authentication.api.Subject;
 
 /**
- * A immutable {@link Subject} thats resource ID cannot be changed.
+ * An immutable {@link Subject} thats resource ID cannot be changed.
  */
 public class ImmutableSubject implements Subject {
 
