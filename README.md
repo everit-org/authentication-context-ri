@@ -1,4 +1,4 @@
-authentication-ri
-=================
+authentication-context-ri
+=========================
 
-The reference implementation of the authentication-api.
+The reference implementation of the authentication-context-api.
