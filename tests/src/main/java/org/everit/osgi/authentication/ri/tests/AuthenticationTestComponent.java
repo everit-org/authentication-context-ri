@@ -1,22 +1,20 @@
 /**
- * This file is part of org.everit.osgi.authentication.ri.tests.
+ * This file is part of org.everit.osgi.authentication.context.ri.tests.
  *
- * org.everit.osgi.authentication.ri.tests is free software: you can redistribute it and/or modify
+ * org.everit.osgi.authentication.context.ri.tests is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * org.everit.osgi.authentication.ri.tests is distributed in the hope that it will be useful,
+ * org.everit.osgi.authentication.context.ri.tests is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with org.everit.osgi.authentication.ri.tests.  If not, see <http://www.gnu.org/licenses/>.
+ * along with org.everit.osgi.authentication.context.ri.tests.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.everit.osgi.authentication.ri.tests;
-
-import java.util.Random;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -24,9 +22,8 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.everit.osgi.authentication.api.AuthenticatedAction;
-import org.everit.osgi.authentication.api.AuthenticationService;
-import org.everit.osgi.authentication.api.Subject;
+import org.everit.osgi.authentication.context.api.AuthenticationContext;
+import org.everit.osgi.authentication.context.api.AuthenticationPropagator;
 import org.everit.osgi.dev.testrunner.TestRunnerConstants;
 import org.everit.osgi.props.PropertyService;
 import org.junit.Assert;
@@ -46,24 +43,20 @@ public class AuthenticationTestComponent {
     private static final String MESSAGE = "the exception that tests the finally block in the runAs() method";
 
     @Reference
-    private AuthenticationService authenticationService;
+    private AuthenticationContext authenticationContext;
+
+    @Reference
+    private AuthenticationPropagator authenticationPropagator;
 
     @Reference
     private PropertyService propertyService;
 
-    private final Subject subject = new Subject() {
+    public void bindAuthenticationContext(final AuthenticationContext authenticationContext) {
+        this.authenticationContext = authenticationContext;
+    }
 
-        private final long resourceId = new Random().nextLong();
-
-        @Override
-        public long getResourceId() {
-            return resourceId;
-        }
-
-    };
-
-    public void bindAuthenticationService(final AuthenticationService as) {
-        authenticationService = as;
+    public void bindAuthenticationPropagator(final AuthenticationPropagator authenticationPropagator) {
+        this.authenticationPropagator = authenticationPropagator;
     }
 
     public void bindPropertyService(final PropertyService ps) {
@@ -73,19 +66,7 @@ public class AuthenticationTestComponent {
     @Test
     public void testArgumentValidations() {
         try {
-            authenticationService.logout(null);
-            Assert.fail();
-        } catch (IllegalArgumentException e) {
-            Assert.assertEquals("subject cannot be null", e.getMessage());
-        }
-        try {
-            authenticationService.runAs(null, null);
-            Assert.fail();
-        } catch (IllegalArgumentException e) {
-            Assert.assertEquals("subject cannot be null", e.getMessage());
-        }
-        try {
-            authenticationService.runAs(subject, null);
+            authenticationPropagator.runAs(0, null);
             Assert.fail();
         } catch (IllegalArgumentException e) {
             Assert.assertEquals("authenticatedAction cannot be null", e.getMessage());
@@ -94,50 +75,39 @@ public class AuthenticationTestComponent {
 
     @Test
     public void testComplex() {
-        String defaultSubjectResourceIdString = propertyService
-                .getProperty(AuthenticationService.PROP_DEFAULT_SUBJECT_RESOURCE_ID);
-        long defaultSubjectResourceId = Long.valueOf(defaultSubjectResourceIdString);
+        String defaultResourceIdString = propertyService
+                .getProperty(AuthenticationContext.PROP_DEFAULT_RESOURCE_ID);
+        long defaultResourceId = Long.valueOf(defaultResourceIdString);
 
-        Subject currentSubject = authenticationService.getCurrentSubject();
-        Assert.assertEquals(defaultSubjectResourceId, currentSubject.getResourceId());
-        authenticationService.runAs(subject, new AuthenticatedAction<Object>() {
+        Assert.assertEquals(defaultResourceId, authenticationContext.getCurrentResourceId());
 
-            @Override
-            public Object run() {
-                Subject currentSubject = authenticationService.getCurrentSubject();
-                Assert.assertEquals(subject.getResourceId(), currentSubject.getResourceId());
-                return null;
-            }
-
+        authenticationPropagator.runAs(1, () -> {
+            Assert.assertEquals(1, authenticationContext.getCurrentResourceId());
+            return null;
         });
-        currentSubject = authenticationService.getCurrentSubject();
-        Assert.assertEquals(defaultSubjectResourceId, currentSubject.getResourceId());
+        Assert.assertEquals(defaultResourceId, authenticationContext.getCurrentResourceId());
 
         try {
-            authenticationService.runAs(subject, new AuthenticatedAction<Object>() {
-
-                @Override
-                public Object run() {
-                    throw new NullPointerException(MESSAGE);
-                }
-
+            authenticationPropagator.runAs(1, () -> {
+                throw new NullPointerException(MESSAGE);
             });
             Assert.fail();
         } catch (NullPointerException e) {
             Assert.assertEquals(MESSAGE, e.getMessage());
         }
-        currentSubject = authenticationService.getCurrentSubject();
-        Assert.assertEquals(defaultSubjectResourceId, currentSubject.getResourceId());
-    }
+        Assert.assertEquals(defaultResourceId, authenticationContext.getCurrentResourceId());
 
-    @Test
-    public void testLogout() {
-        try {
-            authenticationService.logout(subject);
-            Assert.fail();
-        } catch (UnsupportedOperationException e) {
-            Assert.assertNull(e.getMessage());
-        }
+        authenticationPropagator.runAs(1, () -> {
+            Assert.assertEquals(1, authenticationContext.getCurrentResourceId());
+            authenticationPropagator.runAs(2, () -> {
+                Assert.assertEquals(2, authenticationContext.getCurrentResourceId());
+                return null;
+            });
+            Assert.assertEquals(1, authenticationContext.getCurrentResourceId());
+            return null;
+        });
+        Assert.assertEquals(defaultResourceId, authenticationContext.getCurrentResourceId());
+
     }
 
 }

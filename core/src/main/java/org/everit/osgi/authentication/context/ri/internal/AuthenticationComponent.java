@@ -1,24 +1,25 @@
 /**
- * This file is part of org.everit.osgi.authentication.ri.
+ * This file is part of org.everit.osgi.authentication.context.ri.
  *
- * org.everit.osgi.authentication.ri is free software: you can redistribute it and/or modify
+ * org.everit.osgi.authentication.context.ri is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * org.everit.osgi.authentication.ri is distributed in the hope that it will be useful,
+ * org.everit.osgi.authentication.context.ri is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with org.everit.osgi.authentication.ri.  If not, see <http://www.gnu.org/licenses/>.
+ * along with org.everit.osgi.authentication.context.ri.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.everit.osgi.authentication.ri.internal;
+package org.everit.osgi.authentication.context.ri.internal;
 
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -28,27 +29,25 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.everit.osgi.authentication.api.AuthenticatedAction;
-import org.everit.osgi.authentication.api.AuthenticationService;
-import org.everit.osgi.authentication.api.Subject;
-import org.everit.osgi.authentication.ri.ImmutableSubject;
+import org.everit.osgi.authentication.context.api.AuthenticationContext;
+import org.everit.osgi.authentication.context.api.AuthenticationPropagator;
 import org.everit.osgi.props.PropertyService;
 import org.everit.osgi.resource.api.ResourceService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * The reference implementation of the {@link AuthenticationService}.
+ * The reference implementation of the {@link AuthenticationContext} and {@link AuthenticationPropagator} interfaces.
  */
-@Component(name = AuthenticationConstants.COMPONENT_NAME, metatype = true, // FIXME remove immediate = true
-        immediate = true,
+@Component(name = AuthenticationConstants.COMPONENT_NAME, metatype = true,
+        immediate = true, // FIXME remove immediate true
         configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Properties({
         @Property(name = AuthenticationConstants.PROP_RESOURCE_SERVICE_TARGET)
 // FIXME @Property(name = AuthenticationConstants.PROP_PROPERTY_SERVICE_TARGET)
 })
 @Service
-public class AuthenticationComponent implements AuthenticationService {
+public class AuthenticationComponent implements AuthenticationContext, AuthenticationPropagator {
 
     /**
      * The {@link ResourceService} used to initialize the resource of the default subject.
@@ -58,28 +57,27 @@ public class AuthenticationComponent implements AuthenticationService {
 
     /**
      * The {@link PropertyService} used to load/store the value of the
-     * {@link AuthenticationService#PROP_DEFAULT_SUBJECT_RESOURCE_ID}.
+     * {@link AuthenticationContext#PROP_DEFAULT_SUBJECT_RESOURCE_ID}.
      */
     // FIXME @Reference
     private PropertyService propertyService;
 
     /**
-     * The subject assigned to the actual thread.
+     * The Resource ID assigned to the actual thread.
      */
-    private final InheritableThreadLocal<ImmutableSubject> currentSubject =
-            new InheritableThreadLocal<ImmutableSubject>();
+    private final ThreadLocal<Long> currentResourceId = new ThreadLocal<Long>();
 
     /**
-     * The default subject.
+     * The default Resource ID.
      */
-    private ImmutableSubject defaultSubject;
+    private long defaultResourceId;
 
     // FIXME remove
     private ServiceRegistration<PropertyService> propertyServiceSR;
 
     /**
-     * The activate method if this OSGi component. It initializes the {@link #defaultSubject}.
-     * 
+     * The activate method if this OSGi component. It initializes the {@link #defaultResourceId}.
+     *
      * @param context
      *            the bundle context
      * @param componentProperties
@@ -116,13 +114,20 @@ public class AuthenticationComponent implements AuthenticationService {
         propertyServiceSR = context.registerService(PropertyService.class, propertyService,
                 new Hashtable<String, Object>());
 
-        long defaultSubjectResourceId = initDefaultSubjectResourceId();
-        defaultSubject = new ImmutableSubject(defaultSubjectResourceId);
+        String defaultSubjectResourceIdProperty =
+                propertyService.getProperty(AuthenticationContext.PROP_DEFAULT_RESOURCE_ID);
+        if (defaultSubjectResourceIdProperty == null) {
+            defaultResourceId = resourceService.createResource();
+            propertyService.setProperty(
+                    AuthenticationContext.PROP_DEFAULT_RESOURCE_ID, String.valueOf(defaultResourceId));
+        } else {
+            defaultResourceId = Long.valueOf(defaultSubjectResourceIdProperty).longValue();
+        }
     }
 
     /**
      * The property binding method of {@link #propertyService}.
-     * 
+     *
      * @param ps
      *            the service to bind
      */
@@ -132,7 +137,7 @@ public class AuthenticationComponent implements AuthenticationService {
 
     /**
      * The property binding method of {@link #resourceService}.
-     * 
+     *
      * @param rs
      */
     public void bindResourceService(final ResourceService rs) {
@@ -149,51 +154,31 @@ public class AuthenticationComponent implements AuthenticationService {
     }
 
     @Override
-    public Subject getCurrentSubject() {
-        ImmutableSubject immutableSubject = currentSubject.get();
-        if (immutableSubject != null) {
-            return immutableSubject;
+    public long getCurrentResourceId() {
+        Long resourceId = currentResourceId.get();
+        if (resourceId == null) {
+            return defaultResourceId;
         }
-        return defaultSubject;
-    }
-
-    private long initDefaultSubjectResourceId() {
-        long defaultSubjectResourceId;
-        String defaultSubjectResourceIdProperty =
-                propertyService.getProperty(AuthenticationService.PROP_DEFAULT_SUBJECT_RESOURCE_ID);
-        if (defaultSubjectResourceIdProperty == null) {
-            defaultSubjectResourceId = resourceService.createResource();
-            propertyService.setProperty(
-                    AuthenticationService.PROP_DEFAULT_SUBJECT_RESOURCE_ID, String.valueOf(defaultSubjectResourceId));
-        } else {
-            defaultSubjectResourceId = Long.valueOf(defaultSubjectResourceIdProperty).longValue();
-        }
-        return defaultSubjectResourceId;
+        return resourceId.longValue();
     }
 
     @Override
-    public void logout(final Subject subject) {
-        if (subject == null) {
-            throw new IllegalArgumentException("subject cannot be null");
-        }
-        throw new UnsupportedOperationException();
+    public long getDefaultResourceId() {
+        return defaultResourceId;
     }
 
     @Override
-    public <T> T runAs(final Subject subject, final AuthenticatedAction<T> authenticatedAction) {
-        if (subject == null) {
-            throw new IllegalArgumentException("subject cannot be null");
-        }
+    public <T> T runAs(final long authenticatedResourceId, final Supplier<T> authenticatedAction) {
         if (authenticatedAction == null) {
             throw new IllegalArgumentException("authenticatedAction cannot be null");
         }
-        ImmutableSubject immutableSubject = new ImmutableSubject(subject.getResourceId());
-        currentSubject.set(immutableSubject);
+        Long localResourceId = currentResourceId.get();
+        currentResourceId.set(authenticatedResourceId);
         T rval = null;
         try {
-            rval = authenticatedAction.run();
+            rval = authenticatedAction.get();
         } finally {
-            currentSubject.set(defaultSubject);
+            currentResourceId.set(localResourceId);
         }
         return rval;
     }
