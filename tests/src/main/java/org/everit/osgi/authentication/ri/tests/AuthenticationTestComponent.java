@@ -68,7 +68,7 @@ public class AuthenticationTestComponent {
         try {
             authenticationPropagator.runAs(0, null);
             Assert.fail();
-        } catch (IllegalArgumentException e) {
+        } catch (NullPointerException e) {
             Assert.assertEquals("authenticatedAction cannot be null", e.getMessage());
         }
     }

@@ -19,6 +19,7 @@ package org.everit.osgi.authentication.context.ri.internal;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -169,9 +170,7 @@ public class AuthenticationComponent implements AuthenticationContext, Authentic
 
     @Override
     public <T> T runAs(final long authenticatedResourceId, final Supplier<T> authenticatedAction) {
-        if (authenticatedAction == null) {
-            throw new IllegalArgumentException("authenticatedAction cannot be null");
-        }
+        Objects.requireNonNull(authenticatedAction, "authenticatedAction cannot be null");
         Long localResourceId = currentResourceId.get();
         currentResourceId.set(authenticatedResourceId);
         T rval = null;
