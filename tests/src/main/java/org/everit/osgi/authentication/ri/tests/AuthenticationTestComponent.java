@@ -22,10 +22,10 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.everit.osgi.authentication.context.api.AuthenticationContext;
-import org.everit.osgi.authentication.context.api.AuthenticationPropagator;
+import org.everit.osgi.authentication.context.AuthenticationContext;
+import org.everit.osgi.authentication.context.AuthenticationPropagator;
 import org.everit.osgi.dev.testrunner.TestRunnerConstants;
-import org.everit.osgi.props.PropertyService;
+import org.everit.osgi.props.PropertyManager;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -48,8 +48,8 @@ public class AuthenticationTestComponent {
     @Reference
     private AuthenticationPropagator authenticationPropagator;
 
-    @Reference
-    private PropertyService propertyService;
+    @Reference(bind = "setPropertyManager")
+    private PropertyManager propertyManager;
 
     public void bindAuthenticationContext(final AuthenticationContext authenticationContext) {
         this.authenticationContext = authenticationContext;
@@ -59,8 +59,8 @@ public class AuthenticationTestComponent {
         this.authenticationPropagator = authenticationPropagator;
     }
 
-    public void bindPropertyService(final PropertyService ps) {
-        propertyService = ps;
+    public void setPropertyManager(final PropertyManager propertyManager) {
+        this.propertyManager = propertyManager;
     }
 
     @Test
@@ -75,8 +75,7 @@ public class AuthenticationTestComponent {
 
     @Test
     public void testComplex() {
-        String defaultResourceIdString = propertyService
-                .getProperty(AuthenticationContext.PROP_DEFAULT_RESOURCE_ID);
+        String defaultResourceIdString = propertyManager.getProperty(AuthenticationContext.PROP_DEFAULT_RESOURCE_ID);
         long defaultResourceId = Long.valueOf(defaultResourceIdString);
 
         Assert.assertEquals(defaultResourceId, authenticationContext.getCurrentResourceId());

@@ -30,9 +30,9 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.everit.osgi.authentication.context.api.AuthenticationContext;
-import org.everit.osgi.authentication.context.api.AuthenticationPropagator;
-import org.everit.osgi.props.PropertyService;
+import org.everit.osgi.authentication.context.AuthenticationContext;
+import org.everit.osgi.authentication.context.AuthenticationPropagator;
+import org.everit.osgi.props.PropertyManager;
 import org.everit.osgi.resource.api.ResourceService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -53,15 +53,15 @@ public class AuthenticationComponent implements AuthenticationContext, Authentic
     /**
      * The {@link ResourceService} used to initialize the resource of the default subject.
      */
-    @Reference
+    @Reference(bind = "setResourceService")
     private ResourceService resourceService;
 
     /**
-     * The {@link PropertyService} used to load/store the value of the
-     * {@link AuthenticationContext#PROP_DEFAULT_SUBJECT_RESOURCE_ID}.
+     * The {@link PropertyManager} used to load/store the value of the
+     * {@link AuthenticationContext#PROP_DEFAULT_RESOURCE_ID}.
      */
-    // FIXME @Reference
-    private PropertyService propertyService;
+    // FIXME @Reference(bind = "setPropertyManager")
+    private PropertyManager propertyManager;
 
     /**
      * The Resource ID assigned to the actual thread.
@@ -74,7 +74,7 @@ public class AuthenticationComponent implements AuthenticationContext, Authentic
     private long defaultResourceId;
 
     // FIXME remove
-    private ServiceRegistration<PropertyService> propertyServiceSR;
+    private ServiceRegistration<PropertyManager> propertyManagerSR;
 
     /**
      * The activate method if this OSGi component. It initializes the {@link #defaultResourceId}.
@@ -87,7 +87,7 @@ public class AuthenticationComponent implements AuthenticationContext, Authentic
     @Activate
     public void activate(final BundleContext context, final Map<String, Object> componentProperties) {
         // FIXME remove service registration
-        propertyService = new PropertyService() {
+        propertyManager = new PropertyManager() {
 
             private final Map<String, String> props = new HashMap<>();
 
@@ -107,50 +107,30 @@ public class AuthenticationComponent implements AuthenticationContext, Authentic
             }
 
             @Override
-            public String setProperty(final String arg0, final String arg1) {
+            public String updateProperty(final String arg0, final String arg1) {
                 return props.put(arg0, arg1);
             }
-
         };
-        propertyServiceSR = context.registerService(PropertyService.class, propertyService,
+        propertyManagerSR = context.registerService(PropertyManager.class, propertyManager,
                 new Hashtable<String, Object>());
 
         String defaultSubjectResourceIdProperty =
-                propertyService.getProperty(AuthenticationContext.PROP_DEFAULT_RESOURCE_ID);
+                propertyManager.getProperty(AuthenticationContext.PROP_DEFAULT_RESOURCE_ID);
         if (defaultSubjectResourceIdProperty == null) {
             defaultResourceId = resourceService.createResource();
-            propertyService.setProperty(
+            propertyManager.addProperty(
                     AuthenticationContext.PROP_DEFAULT_RESOURCE_ID, String.valueOf(defaultResourceId));
         } else {
             defaultResourceId = Long.valueOf(defaultSubjectResourceIdProperty).longValue();
         }
     }
 
-    /**
-     * The property binding method of {@link #propertyService}.
-     *
-     * @param ps
-     *            the service to bind
-     */
-    public void bindPropertyService(final PropertyService ps) {
-        propertyService = ps;
-    }
-
-    /**
-     * The property binding method of {@link #resourceService}.
-     *
-     * @param rs
-     */
-    public void bindResourceService(final ResourceService rs) {
-        resourceService = rs;
-    }
-
     // FIXME remove
     @Deactivate
     public void deactivate() {
-        if (propertyServiceSR != null) {
-            propertyServiceSR.unregister();
-            propertyServiceSR = null;
+        if (propertyManagerSR != null) {
+            propertyManagerSR.unregister();
+            propertyManagerSR = null;
         }
     }
 
@@ -180,6 +160,14 @@ public class AuthenticationComponent implements AuthenticationContext, Authentic
             currentResourceId.set(localResourceId);
         }
         return rval;
+    }
+
+    public void setPropertyManager(final PropertyManager propertyManager) {
+        this.propertyManager = propertyManager;
+    }
+
+    public void setResourceService(final ResourceService resourceService) {
+        this.resourceService = resourceService;
     }
 
 }
