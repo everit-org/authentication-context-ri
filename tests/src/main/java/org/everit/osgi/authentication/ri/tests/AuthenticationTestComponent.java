@@ -35,27 +35,27 @@ import org.junit.Test;
         @Property(name = TestRunnerConstants.SERVICE_PROPERTY_TESTRUNNER_ENGINE_TYPE, value = "junit4"),
         @Property(name = TestRunnerConstants.SERVICE_PROPERTY_TEST_ID, value = "AuthenticationTest"),
         @Property(name = "authenticationService.target"),
-        @Property(name = "propertyService.target")
+        @Property(name = "propertyManager.target")
 })
 @Service(value = AuthenticationTestComponent.class)
 public class AuthenticationTestComponent {
 
     private static final String MESSAGE = "the exception that tests the finally block in the runAs() method";
 
-    @Reference
+    @Reference(bind = "setAuthenticationContext")
     private AuthenticationContext authenticationContext;
 
-    @Reference
+    @Reference(bind = "setAuthenticationPropagator")
     private AuthenticationPropagator authenticationPropagator;
 
     @Reference(bind = "setPropertyManager")
     private PropertyManager propertyManager;
 
-    public void bindAuthenticationContext(final AuthenticationContext authenticationContext) {
+    public void setAuthenticationContext(final AuthenticationContext authenticationContext) {
         this.authenticationContext = authenticationContext;
     }
 
-    public void bindAuthenticationPropagator(final AuthenticationPropagator authenticationPropagator) {
+    public void setAuthenticationPropagator(final AuthenticationPropagator authenticationPropagator) {
         this.authenticationPropagator = authenticationPropagator;
     }
 
@@ -106,7 +106,6 @@ public class AuthenticationTestComponent {
             return null;
         });
         Assert.assertEquals(defaultResourceId, authenticationContext.getCurrentResourceId());
-
     }
 
 }

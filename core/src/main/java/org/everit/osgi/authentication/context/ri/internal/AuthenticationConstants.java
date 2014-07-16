@@ -27,10 +27,10 @@ public final class AuthenticationConstants {
     public static final String COMPONENT_NAME = "org.everit.osgi.authentication.context.ri.Authentication";
 
     /**
-     * The property name of the OSGi filter expression defining which {@link org.everit.osgi.props.PropertyService}
+     * The property name of the OSGi filter expression defining which {@link org.everit.osgi.props.PropertyManager}
      * should be used by {@link AuthenticationComponent}.
      */
-    public static final String PROP_PROPERTY_SERVICE_TARGET = "propertyService.target";
+    public static final String PROP_PROPERTY_MANAGER_TARGET = "propertyManager.target";
 
     /**
      * The property name of the OSGi filter expression defining which

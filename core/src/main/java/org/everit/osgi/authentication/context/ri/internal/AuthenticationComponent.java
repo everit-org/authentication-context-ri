@@ -16,8 +16,6 @@
  */
 package org.everit.osgi.authentication.context.ri.internal;
 
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -25,7 +23,6 @@ import java.util.function.Supplier;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -35,17 +32,15 @@ import org.everit.osgi.authentication.context.AuthenticationPropagator;
 import org.everit.osgi.props.PropertyManager;
 import org.everit.osgi.resource.api.ResourceService;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 
 /**
  * The reference implementation of the {@link AuthenticationContext} and {@link AuthenticationPropagator} interfaces.
  */
 @Component(name = AuthenticationConstants.COMPONENT_NAME, metatype = true,
-        immediate = true, // FIXME remove immediate true
         configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Properties({
-        @Property(name = AuthenticationConstants.PROP_RESOURCE_SERVICE_TARGET)
-// FIXME @Property(name = AuthenticationConstants.PROP_PROPERTY_SERVICE_TARGET)
+        @Property(name = AuthenticationConstants.PROP_RESOURCE_SERVICE_TARGET),
+        @Property(name = AuthenticationConstants.PROP_PROPERTY_MANAGER_TARGET)
 })
 @Service
 public class AuthenticationComponent implements AuthenticationContext, AuthenticationPropagator {
@@ -60,7 +55,7 @@ public class AuthenticationComponent implements AuthenticationContext, Authentic
      * The {@link PropertyManager} used to load/store the value of the
      * {@link AuthenticationContext#PROP_DEFAULT_RESOURCE_ID}.
      */
-    // FIXME @Reference(bind = "setPropertyManager")
+    @Reference(bind = "setPropertyManager")
     private PropertyManager propertyManager;
 
     /**
@@ -73,9 +68,6 @@ public class AuthenticationComponent implements AuthenticationContext, Authentic
      */
     private long defaultResourceId;
 
-    // FIXME remove
-    private ServiceRegistration<PropertyManager> propertyManagerSR;
-
     /**
      * The activate method if this OSGi component. It initializes the {@link #defaultResourceId}.
      *
@@ -86,34 +78,6 @@ public class AuthenticationComponent implements AuthenticationContext, Authentic
      */
     @Activate
     public void activate(final BundleContext context, final Map<String, Object> componentProperties) {
-        // FIXME remove service registration
-        propertyManager = new PropertyManager() {
-
-            private final Map<String, String> props = new HashMap<>();
-
-            @Override
-            public void addProperty(final String arg0, final String arg1) {
-                props.put(arg0, arg1);
-            }
-
-            @Override
-            public String getProperty(final String arg0) {
-                return props.get(arg0);
-            }
-
-            @Override
-            public String removeProperty(final String arg0) {
-                return props.remove(arg0);
-            }
-
-            @Override
-            public String updateProperty(final String arg0, final String arg1) {
-                return props.put(arg0, arg1);
-            }
-        };
-        propertyManagerSR = context.registerService(PropertyManager.class, propertyManager,
-                new Hashtable<String, Object>());
-
         String defaultSubjectResourceIdProperty =
                 propertyManager.getProperty(AuthenticationContext.PROP_DEFAULT_RESOURCE_ID);
         if (defaultSubjectResourceIdProperty == null) {
@@ -122,15 +86,6 @@ public class AuthenticationComponent implements AuthenticationContext, Authentic
                     AuthenticationContext.PROP_DEFAULT_RESOURCE_ID, String.valueOf(defaultResourceId));
         } else {
             defaultResourceId = Long.valueOf(defaultSubjectResourceIdProperty).longValue();
-        }
-    }
-
-    // FIXME remove
-    @Deactivate
-    public void deactivate() {
-        if (propertyManagerSR != null) {
-            propertyManagerSR.unregister();
-            propertyManagerSR = null;
         }
     }
 
