@@ -1,4 +1,20 @@
 /**
+ * This file is part of Everit - Authentication Context RI.
+ *
+ * Everit - Authentication Context RI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Everit - Authentication Context RI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Everit - Authentication Context RI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+/**
  * This file is part of org.everit.osgi.authentication.context.ri.
  *
  * org.everit.osgi.authentication.context.ri is free software: you can redistribute it and/or modify
@@ -29,21 +45,22 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.everit.osgi.authentication.context.AuthenticationContext;
 import org.everit.osgi.authentication.context.AuthenticationPropagator;
+import org.everit.osgi.authentication.context.ri.AuthenticationContextConstants;
 import org.everit.osgi.props.PropertyManager;
-import org.everit.osgi.resource.api.ResourceService;
+import org.everit.osgi.resource.ResourceService;
 import org.osgi.framework.BundleContext;
 
 /**
  * The reference implementation of the {@link AuthenticationContext} and {@link AuthenticationPropagator} interfaces.
  */
-@Component(name = AuthenticationConstants.COMPONENT_NAME, metatype = true,
+@Component(name = AuthenticationContextConstants.SERVICE_FACTORYPID_AUTHENTICATION_CONTEXT, metatype = true,
         configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Properties({
-        @Property(name = AuthenticationConstants.PROP_RESOURCE_SERVICE_TARGET),
-        @Property(name = AuthenticationConstants.PROP_PROPERTY_MANAGER_TARGET)
+        @Property(name = AuthenticationContextConstants.PROP_RESOURCE_SERVICE_TARGET),
+        @Property(name = AuthenticationContextConstants.PROP_PROPERTY_MANAGER_TARGET)
 })
 @Service
-public class AuthenticationComponent implements AuthenticationContext, AuthenticationPropagator {
+public class AuthenticationContextComponent implements AuthenticationContext, AuthenticationPropagator {
 
     /**
      * The {@link ResourceService} used to initialize the resource of the default subject.
