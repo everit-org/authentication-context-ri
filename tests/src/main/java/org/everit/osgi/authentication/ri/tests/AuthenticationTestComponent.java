@@ -24,6 +24,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.everit.osgi.authentication.context.AuthenticationContext;
 import org.everit.osgi.authentication.context.AuthenticationPropagator;
+import org.everit.osgi.authentication.context.ri.AuthenticationContextConstants;
 import org.everit.osgi.dev.testrunner.TestRunnerConstants;
 import org.everit.osgi.props.PropertyManager;
 import org.junit.Assert;
@@ -75,7 +76,8 @@ public class AuthenticationTestComponent {
 
     @Test
     public void testComplex() {
-        String defaultResourceIdString = propertyManager.getProperty(AuthenticationContext.PROP_DEFAULT_RESOURCE_ID);
+        String defaultResourceIdString =
+                propertyManager.getProperty(AuthenticationContextConstants.PROP_DEFAULT_RESOURCE_ID);
         long defaultResourceId = Long.valueOf(defaultResourceIdString);
 
         Assert.assertEquals(defaultResourceId, authenticationContext.getCurrentResourceId());

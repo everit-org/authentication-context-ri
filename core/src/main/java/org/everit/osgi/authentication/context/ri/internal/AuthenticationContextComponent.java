@@ -96,11 +96,11 @@ public class AuthenticationContextComponent implements AuthenticationContext, Au
     @Activate
     public void activate(final BundleContext context, final Map<String, Object> componentProperties) {
         String defaultSubjectResourceIdProperty =
-                propertyManager.getProperty(AuthenticationContext.PROP_DEFAULT_RESOURCE_ID);
+                propertyManager.getProperty(AuthenticationContextConstants.PROP_DEFAULT_RESOURCE_ID);
         if (defaultSubjectResourceIdProperty == null) {
             defaultResourceId = resourceService.createResource();
             propertyManager.addProperty(
-                    AuthenticationContext.PROP_DEFAULT_RESOURCE_ID, String.valueOf(defaultResourceId));
+                    AuthenticationContextConstants.PROP_DEFAULT_RESOURCE_ID, String.valueOf(defaultResourceId));
         } else {
             defaultResourceId = Long.valueOf(defaultSubjectResourceIdProperty).longValue();
         }

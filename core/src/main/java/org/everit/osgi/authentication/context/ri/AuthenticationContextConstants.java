@@ -39,6 +39,15 @@ public final class AuthenticationContextConstants {
      */
     public static final String PROP_RESOURCE_SERVICE_TARGET = "resourceService.target";
 
+    /**
+     * The property key of the ID of the <a href="https://github.com/everit-org/resource">resource</a> assigned to the
+     * Default Resource ID. The Default Resource ID (a.k.a. guest or not authenticated resource) is the resource that is
+     * returned by the {@link #getCurrentResourceId()} method if there is no authenticated Resource ID assigned to the
+     * current thread. The value of this property is stored in the configuration.
+     */
+    public static final String PROP_DEFAULT_RESOURCE_ID =
+            "org.everit.osgi.authentication.context.ri.DEFAULT_RESOURCE_ID";
+
     private AuthenticationContextConstants() {
     }
 
