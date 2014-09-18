@@ -6,9 +6,9 @@ The reference implementation of the [authentication-context-api][1] based on
 
 #Component
 The module contains one Declarative Services component. The component can be 
-instantiated multiple times via Configuration Admin. The component registers 
-the [AuthenticationPropagator][5] and the [AuthenticationContext][6] OSGi 
-services.
+instantiated multiple times via Configuration Admin. The component registers
+two OSGi services: the [AuthenticationPropagator][5] and the 
+[AuthenticationContext][6] provided by the [authentication-context-api][1].
 
 #Concept
 Full authentication concept is available on blog post [Everit Authentication][4].
