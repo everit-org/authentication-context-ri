@@ -12,6 +12,7 @@ two OSGi services: the [AuthenticationPropagator][5] and the
 
 #Concept
 Full authentication concept is available on blog post [Everit Authentication][4].
+Implemented components based on this concept are listed [here][7].
 
 [1]: https://github.com/everit-org/authentication-context-api
 [2]: https://github.com/everit-org/resource-api
@@ -19,3 +20,4 @@ Full authentication concept is available on blog post [Everit Authentication][4]
 [4]: http://everitorg.wordpress.com/2014/07/31/everit-authentication/
 [5]: http://attilakissit.wordpress.com/2014/07/09/everit-authentication/#authentication_propagator
 [6]: http://attilakissit.wordpress.com/2014/07/09/everit-authentication/#authentication_context
+[7]: http://everitorg.wordpress.com/2014/07/31/everit-authentication-implemented-and-released-2/
