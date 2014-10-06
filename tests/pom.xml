@@ -91,7 +91,7 @@
       <plugin>
         <groupId>org.everit.osgi.dev</groupId>
         <artifactId>eosgi-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <id>integration-test</id>
@@ -103,7 +103,9 @@
         </executions>
         <configuration>
           <jacoco>
-            <includes>org.everit.osgi.authentication.api.*:org.everit.osgi.authentication.ri.*</includes>
+            <includes>org.everit.osgi.authentication.context.api.*:org.everit.osgi.authentication.context.ri.*</includes>
+            <excludes>org.everit.osgi.authentication.ri.tests.*</excludes>
+            <output>$${ if (System.getenv("EOSGI_STOP_AFTER_TESTS").equals("true")) "file"; else "tcpserver"; }</output>
           </jacoco>
           <environments>
             <environment>
@@ -117,8 +119,8 @@
                 <osgi.hook.configurators.exclude>org.eclipse.core.runtime.internal.adaptor.EclipseLogHook</osgi.hook.configurators.exclude>
               </systemProperties>
               <vmOptions>
-                <vmOption>-Xdebug</vmOption>
-                <vmOption>-Xrunjdwp:server=y,transport=dt_socket,address=1044,suspend=n</vmOption>
+<!--                 <vmOption>-Xdebug</vmOption> -->
+<!--                 <vmOption>-Xrunjdwp:server=y,transport=dt_socket,address=1044,suspend=n</vmOption> -->
               </vmOptions>
             </environment>
           </environments>
@@ -333,7 +335,7 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.4.177</version>
+      <version>1.4.181</version>
     </dependency>
 
     <dependency>
