@@ -57,7 +57,7 @@ import org.osgi.framework.Constants;
 @Component(name = AuthenticationContextConstants.SERVICE_FACTORYPID_AUTHENTICATION_CONTEXT, metatype = true,
         configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Properties({
-        @Property(name = Constants.SERVICE_DESCRIPTION,
+        @Property(name = Constants.SERVICE_DESCRIPTION, propertyPrivate = false,
                 value = AuthenticationContextConstants.DEFAULT_SERVICE_DESCRIPTION),
         @Property(name = AuthenticationContextConstants.PROP_RESOURCE_SERVICE_TARGET),
         @Property(name = AuthenticationContextConstants.PROP_PROPERTY_MANAGER_TARGET)
