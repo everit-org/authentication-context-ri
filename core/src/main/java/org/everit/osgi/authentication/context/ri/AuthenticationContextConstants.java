@@ -21,6 +21,9 @@ package org.everit.osgi.authentication.context.ri;
  */
 public final class AuthenticationContextConstants {
 
+    public static final String DEFAULT_SERVICE_DESCRIPTION =
+            "Default Authentication RI Context";
+
     /**
      * The service factory PID of the authentication component.
      */

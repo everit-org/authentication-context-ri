@@ -49,6 +49,7 @@ import org.everit.osgi.authentication.context.ri.AuthenticationContextConstants;
 import org.everit.osgi.props.PropertyManager;
 import org.everit.osgi.resource.ResourceService;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 
 /**
  * The reference implementation of the {@link AuthenticationContext} and {@link AuthenticationPropagator} interfaces.
@@ -56,6 +57,8 @@ import org.osgi.framework.BundleContext;
 @Component(name = AuthenticationContextConstants.SERVICE_FACTORYPID_AUTHENTICATION_CONTEXT, metatype = true,
         configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Properties({
+        @Property(name = Constants.SERVICE_DESCRIPTION,
+                value = AuthenticationContextConstants.DEFAULT_SERVICE_DESCRIPTION),
         @Property(name = AuthenticationContextConstants.PROP_RESOURCE_SERVICE_TARGET),
         @Property(name = AuthenticationContextConstants.PROP_PROPERTY_MANAGER_TARGET)
 })
