@@ -33,9 +33,9 @@ public class AuthenticationContextImpl implements AuthenticationContext, Authent
    * The property key of the ID of the <a href="https://github.com/everit-org/resource">resource</a>
    * assigned to the Default Resource ID. The Default Resource ID (a.k.a. guest or not authenticated
    * resource) is the resource that is returned by the
-   * {@link org.everit.osgi.authentication.context.AuthenticationContext#getCurrentResourceId()}
-   * method if there is no authenticated Resource ID assigned to the current thread. The value of
-   * this property is stored in the configuration.
+   * {@link org.everit.authentication.context.AuthenticationContext#getCurrentResourceId()} method
+   * if there is no authenticated Resource ID assigned to the current thread. The value of this
+   * property is stored in the configuration.
    */
   public static final String PROP_DEFAULT_RESOURCE_ID =
       "org.everit.authentication.context.ri.DEFAULT_RESOURCE_ID";
@@ -87,13 +87,13 @@ public class AuthenticationContextImpl implements AuthenticationContext, Authent
   @Override
   public <T> T runAs(final long authenticatedResourceId, final Supplier<T> authenticatedAction) {
     Objects.requireNonNull(authenticatedAction, "authenticatedAction cannot be null");
-    Long localResourceId = currentResourceId.get();
+    Long localCurrentResourceId = currentResourceId.get();
     currentResourceId.set(authenticatedResourceId);
     T rval = null;
     try {
       rval = authenticatedAction.get();
     } finally {
-      currentResourceId.set(localResourceId);
+      currentResourceId.set(localCurrentResourceId);
     }
     return rval;
   }
